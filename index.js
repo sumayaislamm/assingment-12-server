@@ -38,44 +38,55 @@ async function run(){
          res.send(product);
        });
 
+       app.get('/model', async(req, res) =>{
+         const email = req.query.email;
+         console.log(email);
+         const query = {email: email};
+         console.log(query);
+         const model = await modelCollection.find(query).toArray();
+         res.send(model);
+       })
+
      
        app.post('/model', async(req, res) => {
          const model = req.body;
          const query = {model: model.model, person: model.person} 
          const exists = await modelCollection.findOne(query);
     
-         if(exists){
-           return res.send({success: false, model:exists})
-         }
+        //  if(exists){
+        //    return res.send({success: false, model:exists})
+        //  }
 
          const result = await modelCollection.insertOne  (model);
          return res.send({success: true, result});
        })
       
-       app.get('/available', async(req, res)=>{
+      
 
-        const available = req.query.available || "67";
+      //  app.get('/available', async(req, res)=>{
 
-        const products = await productCollection.find().toArray();
+      //   const available = req.query.available || "67";
 
-        const query = {available: available};
-        const model = await modelCollection.find(query).toArray();
+      //   const products = await productCollection.find().toArray();
 
-        products.forEach(product =>{
-          const productModel = model.filter(m => m.model === product.name);
-          const modeled = productModel.map(a => a.available);
-          product.modeled = modeled
-        })
+      //   const query = {available: available};
+      //   const model = await modelCollection.find(query).toArray();
 
-        res.send(products);
+      //   products.forEach(product =>{
+      //     const productModel = model.filter(m => m.model === product.name);
+      //     const modeled = productModel.map(a => a.available);
+      //     product.modeled = modeled
+      //   })
 
-       })
+      //   res.send(products);
+
+      //  })
       
 
 
         
 
-      // //  add post 
+      //  add post 
 
       //  app.post('/product', async(req, res) =>{
       //    const newReview = req.body;
