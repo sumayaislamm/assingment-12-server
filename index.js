@@ -20,6 +20,7 @@ async function run(){
        await client.connect();
        const productCollection = client.db('handyWorks').collection('products');
        
+       
       //  show products 
        app.get('/product', async(req, res ) =>{
         const query = {};
@@ -36,13 +37,13 @@ async function run(){
        });
         
 
-      //  add post 
+      // //  add post 
 
-       app.post('/product', async(req, res) =>{
-         const newReview = req.body;
-         const result = await productCollection.insertOne(newReview);
-         res.send(result);
-       });
+      //  app.post('/product', async(req, res) =>{
+      //    const newReview = req.body;
+      //    const result = await reviewCollection.insertOne(newReview);
+      //    res.send(result);
+      //  });
     }
     finally{
 
