@@ -19,7 +19,9 @@ async function run(){
     try{
        await client.connect();
        const productCollection = client.db('handyWorks').collection('products');
+       const modelCollection = client.db('handyWorks').collection('model');
        
+      
        
       //  show products 
        app.get('/product', async(req, res ) =>{
@@ -35,6 +37,24 @@ async function run(){
          const product = await productCollection.findOne(query);
          res.send(product);
        });
+
+     
+       app.post('/model', async(req, res) => {
+         const model = req.body;
+         const query = {model: model.model, person: model.person} 
+         const exists = await modelCollection.findOne(query);
+    
+         if(exists){
+           return res.send({success: false, model:exists})
+         }
+
+         const result = await modelCollection.insertOne  (model);
+         return res.send({success: true, result});
+       })
+      
+      
+
+
         
 
       // //  add post 
