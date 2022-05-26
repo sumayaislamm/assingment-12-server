@@ -35,6 +35,7 @@ async function run(){
 
        app.put('/user/:email', async(req, res) =>{
          const email = req.params.email;
+         console.log(email);
          const user = req.body;
          const filter = {email: email};
          const options = {upsert: true};
@@ -42,8 +43,8 @@ async function run(){
               $set:user,
          };
          const result = await userCollection.updateOne(filter, updateDoc, options);
-         const token = jwt.sign({email: email}, process.env.ACCESS_TOKEN_SECRATE, { expiresIn: '1h'} )
-         res.send({result, token}); 
+         const token = jwt.sign({email: email}, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1h'})
+         res.send({result, accessToke: token}); 
        })
 
        app.get('/product/:id', async(req, res) =>{
