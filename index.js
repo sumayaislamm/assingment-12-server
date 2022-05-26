@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const jwt = require('jsonwebtoken');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config();
 const app = express();
@@ -20,6 +21,7 @@ async function run(){
        await client.connect();
        const productCollection = client.db('handyWorks').collection('products');
        const modelCollection = client.db('handyWorks').collection('model');
+       const userCollection = client.db('handyWorks').collection('user');
        
       
        
@@ -31,6 +33,19 @@ async function run(){
         res.send(products);
        });
 
+       app.put('/user/:email', async(req, res) =>{
+         const email = req.params.email;
+         const user = req.body;
+         const filter = {email: email};
+         const options = {upsert: true};
+         const updateDoc = {
+              $set:user,
+         };
+         const result = await userCollection.updateOne(filter, updateDoc, options);
+         const token = jwt.sign({email: email}, process.env.ACCESS_TOKEN_SECRATE, { expiresIn: '1h'} )
+         res.send({result, token}); 
+       })
+
        app.get('/product/:id', async(req, res) =>{
          const id = req.params.id;
          const query = {_id: ObjectId(id)};
@@ -40,7 +55,6 @@ async function run(){
 
        app.get('/model', async(req, res) =>{
          const email = req.query.email;
-         console.log(email);
          const query = {email: email};
          console.log(query);
          const model = await modelCollection.find(query).toArray();
