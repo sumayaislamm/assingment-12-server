@@ -52,6 +52,24 @@ async function run(){
          return res.send({success: true, result});
        })
       
+       app.get('/available', async(req, res)=>{
+
+        const available = req.query.available || "67";
+
+        const products = await productCollection.find().toArray();
+
+        const query = {available: available};
+        const model = await modelCollection.find(query).toArray();
+
+        products.forEach(product =>{
+          const productModel = model.filter(m => m.model === product.name);
+          const modeled = productModel.map(a => a.available);
+          product.modeled = modeled
+        })
+
+        res.send(products);
+
+       })
       
 
 
