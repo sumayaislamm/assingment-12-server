@@ -21,6 +21,14 @@ function verifyJWT (req, res, next){
   if(!authHeader){
     return res.status(401).send({message: 'UnAuthorized access'});
   }
+  const token = authHeader.split('')[1];
+  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, function(err, decoded){
+    if(err){
+      return res.status(403).send({message: 'Forbidden access'});
+    }
+    req.decoded = decoded;
+    next();
+  });
 }
 
 async function run(){
@@ -64,25 +72,30 @@ async function run(){
        app.get('/model',verifyJWT, async(req, res) =>{
          const email = req.query.email;
          const authorization = req.headers.authorization;
-         console.log('auth header', authorization);
-         const query = {email: email};
-         console.log(query);
-         const model = await modelCollection.find(query).toArray();
-         res.send(model);
+         const decodedEmail = req.decoded.email;
+         if(email === decodedEmail){
+          const query = {email: email};
+          const model = await modelCollection.find(query).toArray();
+         return res.send(model);
+         }
+         else{
+           return res.send(403).send({message: 'forbidden access'});
+         }
        })
 
      
        app.post('/model', async(req, res) => {
          const model = req.body;
-         const query = {model: model.model, person: model.person} 
+         const query = {model: model.model, person: model.person}
+         
          const exists = await modelCollection.findOne(query);
-    
-        //  if(exists){
-        //    return res.send({success: false, model:exists})
-        //  }
-
+         if(exists){
+           return res.send({success: false, model:exists})
+         }
          const result = await modelCollection.insertOne  (model);
          return res.send({success: true, result});
+         
+
        })
       
       
