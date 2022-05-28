@@ -39,6 +39,7 @@ async function run(){
        const productCollection = client.db('handyWorks').collection('products');
        const modelCollection = client.db('handyWorks').collection('model');
        const userCollection = client.db('handyWorks').collection('user');
+       const reviewCollection = client.db('handyWorks').collection('review');
        
       
        
@@ -86,15 +87,38 @@ async function run(){
          return res.send(model);
          }
          else{
-           return res.send(403).send({message: 'forbidden access'});
+           return res.status(403).send({message: 'forbidden access'});
          }
        })
 
      
        app.post('/model', async(req, res) => {
          const model = req.body;
+        //  const query = {model: model.model, person: model.person}
+         
+        //  const exists = await modelCollection.findOne(query);
+        //  if(exists){
+        //    return res.send({success: false, model:exists})
+        //  }
          const result = await modelCollection.insertOne  (model);
-         return res.send(result);})
+         return res.send(result);
+         
+
+       })
+
+       app.post("/review", async (req, res) => {
+        const review = req.body;
+        const result = await reviewCollection.insertOne(review);
+        res.send(result);
+      });
+
+      // admin
+      app.get("/admin/:email", async (req, res) => {
+        const email = req.params.email;
+        const user = await userCollection.findOne({ email: email });
+        const isAdmin = user.role === "admin";
+        res.send({ admin: isAdmin });
+      });
  
     }
     finally{
