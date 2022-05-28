@@ -16,20 +16,22 @@ app.use(express.json());
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.6w3c6.mongodb.net/?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 
-function verifyJWT (req, res, next){
+function verifyJWT(req, res, next) {
   const authHeader = req.headers.authorization;
-  if(!authHeader){
-    return res.status(401).send({message: 'UnAuthorized access'});
+  if (!authHeader) {
+    return res.status(401).send({ message: 'UnAuthorized access' });
   }
-  const token = authHeader.split('')[1];
-  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, function(err, decoded){
-    if(err){
-      return res.status(403).send({message: 'Forbidden access'});
+  const token = authHeader.split(' ')[1];
+  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, function (err, decoded) {
+    if (err) {
+      return res.status(403).send({ message: 'Forbidden access' })
     }
     req.decoded = decoded;
     next();
   });
 }
+
+
 
 async function run(){
     try{
@@ -58,7 +60,7 @@ async function run(){
               $set:user,
          };
          const result = await userCollection.updateOne(filter, updateDoc, options);
-         const token = jwt.sign({email: email}, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1h'})
+         const token = jwt.sign({email: email}, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '17d'})
          res.send({result, accessToken: token}); 
        })
 
@@ -69,12 +71,17 @@ async function run(){
          res.send(product);
        });
 
-       app.get('/model',verifyJWT, async(req, res) =>{
-         const email = req.query.email;
-         const authorization = req.headers.authorization;
+
+
+       app.get('/model/:email', verifyJWT, async (req, res) =>{
+         const person = req.params.email;
+         console.log(person);
+        
          const decodedEmail = req.decoded.email;
-         if(email === decodedEmail){
-          const query = {email: email};
+         console.log(decodedEmail);
+         
+         if(person === decodedEmail){
+          const query = {person: person};
           const model = await modelCollection.find(query).toArray();
          return res.send(model);
          }
@@ -86,50 +93,9 @@ async function run(){
      
        app.post('/model', async(req, res) => {
          const model = req.body;
-         const query = {model: model.model, person: model.person}
-         
-         const exists = await modelCollection.findOne(query);
-         if(exists){
-           return res.send({success: false, model:exists})
-         }
          const result = await modelCollection.insertOne  (model);
-         return res.send({success: true, result});
-         
-
-       })
-      
-      
-
-      //  app.get('/available', async(req, res)=>{
-
-      //   const available = req.query.available || "67";
-
-      //   const products = await productCollection.find().toArray();
-
-      //   const query = {available: available};
-      //   const model = await modelCollection.find(query).toArray();
-
-      //   products.forEach(product =>{
-      //     const productModel = model.filter(m => m.model === product.name);
-      //     const modeled = productModel.map(a => a.available);
-      //     product.modeled = modeled
-      //   })
-
-      //   res.send(products);
-
-      //  })
-      
-
-
-        
-
-      //  add post 
-
-      //  app.post('/product', async(req, res) =>{
-      //    const newReview = req.body;
-      //    const result = await reviewCollection.insertOne(newReview);
-      //    res.send(result);
-      //  });
+         return res.send(result);})
+ 
     }
     finally{
 
