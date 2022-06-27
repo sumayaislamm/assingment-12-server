@@ -94,16 +94,15 @@ async function run(){
      
        app.post('/model', async(req, res) => {
          const model = req.body;
-        //  const query = {model: model.model, person: model.person}
+         const query = {model: model.model, person: model.person}
          
-        //  const exists = await modelCollection.findOne(query);
-        //  if(exists){
-        //    return res.send({success: false, model:exists})
-        //  }
+         const exists = await modelCollection.findOne(query);
+         if(exists){
+           return res.send({success: true, model:exists})
+         }
          const result = await modelCollection.insertOne  (model);
          return res.send(result);
          
-
        })
 
        app.post("/review", async (req, res) => {
