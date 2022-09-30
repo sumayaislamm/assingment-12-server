@@ -56,6 +56,25 @@ async function run(){
         res.send(users);
        })
 
+      //  show review 
+       app.get('/review', async(req, res ) =>{
+        const query = {};
+        const cursor = reviewCollection.find(query);
+        const reviews = await cursor.toArray();
+        res.send(reviews);
+       });
+
+       app.get('/review', verifyJWT, async(req, res) =>{
+        const reviews = await reviewCollection.find().toArray();
+        res.send(reviews);
+       })
+
+       app.post('/review', async(req, res) =>{
+        const newReview = req.body;
+        const reviews = await reviewCollection.insertOne(newReview);
+        res.send(reviews);
+      });
+
       //  admin
       
       app.get('/admin/:email', async(req, res) =>{
@@ -138,11 +157,7 @@ async function run(){
          
        })
 
-       app.post("/review", async (req, res) => {
-        const review = req.body;
-        const result = await reviewCollection.insertOne(review);
-        res.send(result);
-      });
+      
 
       // admin
       // app.get("/admin/:email", async (req, res) => {
